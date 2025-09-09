@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.contrib.auth import authenticate, login
 from django.conf import settings
+
+from core.forms import UserRegisterForm
+from . models import Usuario
 import json
 import base64
 import cv2
@@ -10,14 +14,41 @@ import tempfile
 import os
 
 def login_view(request):
+    error = None
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        try:
+            user = Usuario.objects.get(email=email)
+            if user.verify_password(password):
+                request.session["user_id"] = user.id
+                return redirect("core:recognize")
+            else:
+                error = "Senha incorreta"
+        except Usuario.DoesNotExist:
+            error = "Usuário não encontrado"
+    return render(request, "core/login.html", {"error": error})
+
+
+def register_view(request):
+    
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        if email == 'guilhermereif18@gmail.com' and password == 'admin':
+
+        form = UserRegisterForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            
             return redirect('core:recognize')
-        else:
-            return render(request, 'core/login.html', {'error': 'Invalid credentials'})
-    return render(request, 'core/login.html')
+
+    else:
+
+        form = UserRegisterForm()
+
+        render(request, 'core/register.html', {'error': 'Tentativa de acesso inválida'})
+
+    return render(request, 'core/register.html')
 
 def recognize_view(request):
     if request.method == 'POST':
