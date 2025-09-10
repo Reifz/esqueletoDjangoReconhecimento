@@ -31,29 +31,33 @@ def login_view(request):
 
 
 def register_view(request):
-    
     if request.method == 'POST':
-
         form = UserRegisterForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            
+
+            request.session['user_id'] = user.id
             return redirect('core:recognize')
+        else:
+            # Retorna o formulário com erros
+            return render(request, 'core/register.html', {'form': form})
 
     else:
-
         form = UserRegisterForm()
+        return render(request, 'core/register.html', {'form': form})
 
-        render(request, 'core/register.html', {'error': 'Tentativa de acesso inválida'})
-
-    return render(request, 'core/register.html')
 
 def recognize_view(request):
     if request.method == 'POST':
         temp_img_path = None
         try:
+
+            user_id = request.session.get('user_id')
+
+            user = Usuario.objects.get(id=user_id)
+
             data = json.loads(request.body)
             image_data = data['image']
             
@@ -72,9 +76,8 @@ def recognize_view(request):
 
             # Save the image to the temporary path
             cv2.imwrite(temp_img_path, img_captured)
-
             # Path to the reference image
-            reference_image_path = settings.BASE_DIR / 'foto4.jpg'
+            reference_image_path = user.photo.path
 
             # Verify the face
             print("Performing face verification...")
@@ -85,6 +88,10 @@ def recognize_view(request):
                 enforce_detection=False
             )
             print("Verification complete.")
+
+            if result['verified'] == True:
+
+                return render(request, "core/home.html", {'user': user})
 
             return JsonResponse({'verified': result['verified'], 'distance': result['distance']})
         except Exception as e:

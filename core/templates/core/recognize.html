@@ -54,7 +54,7 @@
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         
-        resultDiv.innerHTML = "Verifying...";
+        resultDiv.innerHTML = "Verificando...";
 
         fetch(window.location.href, {
           method: 'POST',

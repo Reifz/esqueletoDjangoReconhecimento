@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 # Create your models here.
 
 class Usuario(models.Model):
-    photo  = models.ImageField(upload_to='media')
+    photo  = models.ImageField(upload_to='photo')
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128, validators=[MinLengthValidator(8)])
