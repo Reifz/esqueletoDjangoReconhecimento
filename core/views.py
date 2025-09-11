@@ -13,7 +13,7 @@ def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        if email == 'guilhermereif18@gmail.com' and password == 'admin':
+        if email == 'SEU_EMAIL@gmail.com' and password == 'admin':
             return redirect('core:recognize')
         else:
             return render(request, 'core/login.html', {'error': 'Invalid credentials'})
