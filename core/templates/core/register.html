@@ -19,18 +19,38 @@
             <div class="mb-3">
               <label for="photo" class="form-label">Foto</label>
               <input type="file" class="form-control" id="photo" name="photo" accept="image/*" required>
+              {% if form.photo.errors %}
+                <div class="text-danger">
+                  Foto é necessária
+                </div>
+              {% endif %}
             </div>
             <div class="mb-3">
               <label for="name" class="form-label">Nome</label>
               <input type="text" class="form-control" id="name" name="name" required>
+              {% if form.name.errors %}
+                <div class="text-danger">
+                  Nome é necessário
+                </div>
+              {% endif %}
             </div>
             <div class="mb-3">
               <label for="email" class="form-label">Email</label>
               <input type="email" class="form-control" id="email" name="email" required>
+              {% if form.email.errors %}
+                <div class="text-danger">
+                  Email é necessário
+                </div>
+              {% endif %}
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">Senha</label>
-              <input type="password" class="form-control" id="password" name="password" required>
+              <input type="password" class="form-control" id="password" name="password" minlenght="8" required>
+              {% if form.password.errors %}
+                <div class="text-danger">
+                  Senha deve ter no mínimo 8 dígitos
+                </div>
+              {% endif %}
             </div>
             <div class="d-flex gap-4">
               <button type="submit" class="btn btn-primary w-100">Enviar</button>
