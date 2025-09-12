@@ -3,5 +3,6 @@
 * .jpeg
 * .jpg
 .sqlite3
-.pyc
+*.pyc
+*.cpython
 /__pycache__/

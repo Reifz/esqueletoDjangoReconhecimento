@@ -32,7 +32,6 @@ def login_view(request):
 
 def register_view(request):
     if request.method == 'POST':
-<<<<<<< HEAD
         form = UserRegisterForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)
@@ -40,11 +39,6 @@ def register_view(request):
             user.save()
 
             request.session['user_id'] = user.id
-=======
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        if email == 'SEU_EMAIL@gmail.com' and password == 'admin':
->>>>>>> 4fdd18e548013740a0d5d4dd16aa5b78f8cd7e2e
             return redirect('core:recognize')
         else:
             # Retorna o formulário com erros
