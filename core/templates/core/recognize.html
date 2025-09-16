@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Facial Recognition</title>
+    <title>Reconhecimento Facial</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
       #video-container {
@@ -14,16 +14,43 @@
       }
       #video {
         border: 1px solid black;
+        max-width: 100%;
+        height: auto;
+      }
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .status-on {
+        background-color: #28a745;
+        box-shadow: 0 0 8px #28a745;
+      }
+      .status-off {
+        background-color: #dc3545;
+      }
+      .status-text {
+        font-weight: bold;
+        margin: 10px 0;
       }
     </style>
   </head>
   <body>
     <div class="container mt-5">
-      <h1 class="text-center">Facial Recognition</h1>
+      <h1 class="text-center">Reconhecimento Facial</h1>
+      
+      <div id="camera-status" class="text-center status-text">
+        <span class="status-indicator status-off"></span>
+        <span id="status-text">Iniciando câmera...</span>
+      </div>
+      
       <div id="video-container">
         <video id="video" width="640" height="480" autoplay></video>
-        <button id="capture" class="btn btn-primary mt-3">Capture</button>
+        <button id="capture" class="btn btn-primary mt-3">Capturar</button>
       </div>
+      
       <div id="result" class="text-center mt-3"></div>
       {% csrf_token %}
     </div>
@@ -32,20 +59,37 @@
       const video = document.getElementById('video');
       const captureButton = document.getElementById('capture');
       const resultDiv = document.getElementById('result');
+      const statusText = document.getElementById('status-text');
+      const statusIndicator = document.querySelector('.status-indicator');
       const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+      // Função para iniciar a câmera
       async function startCamera() {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
           video.srcObject = stream;
+          
+          // Atualizar status para indicar que a câmera está funcionando
+          statusIndicator.classList.remove('status-off');
+          statusIndicator.classList.add('status-on');
+          statusText.textContent = 'Câmera ativa';
+          
         } catch (err) {
-          console.error("Error accessing camera: ", err);
-          resultDiv.innerHTML = "Error accessing camera. Please grant permission.";
+          console.error("Erro ao acessar a câmera: ", err);
+          
+          // Atualizar status para indicar erro na câmera
+          statusIndicator.classList.remove('status-on');
+          statusIndicator.classList.add('status-off');
+          statusText.textContent = 'Erro ao acessar a câmera';
+          
+          resultDiv.innerHTML = "Erro ao acessar a câmera. Por favor, verifique as permissões.";
         }
       }
 
+      // Iniciar a câmera quando a página carregar
       startCamera();
 
+      // Evento para o botão de captura
       captureButton.addEventListener('click', () => {
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -67,19 +111,22 @@
         .then(response => response.json())
         .then(data => {
           if (data.error) {
-            resultDiv.innerHTML = `Error: ${data.error}`;
+            resultDiv.innerHTML = `Erro: ${data.error}`;
           } else {
             if (data.verified) {
               resultDiv.innerHTML = `<div class="alert alert-success">Rosto reconhecido. Redirecionando...</div>`;
-              window.location.href = "{% url 'core:home' %}";
+              // Redirecionar após um pequeno delay
+              setTimeout(() => {
+                window.location.href = data.redirect_url;
+              }, 1500);
             } else {
               resultDiv.innerHTML = `<div class="alert alert-danger">Rosto não reconhecido</div>`;
             }
           }
         })
         .catch(error => {
-          console.error('Error:', error);
-          resultDiv.innerHTML = "An error occurred during verification.";
+          console.error('Erro:', error);
+          resultDiv.innerHTML = "Ocorreu um erro durante a verificação.";
         });
       });
     </script>

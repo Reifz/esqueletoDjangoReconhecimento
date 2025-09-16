@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from django.conf import settings
+from django.urls import reverse
 
 from core.forms import UserRegisterForm
-from . models import Usuario
+from . models import LogAcesso, Usuario
 import json
 import base64
 import cv2
@@ -53,8 +54,9 @@ def recognize_view(request):
     if request.method == 'POST':
         temp_img_path = None
         try:
-
             user_id = request.session.get('user_id')
+            if not user_id:
+                return JsonResponse({'error': 'Usuário não logado'}, status=400)
 
             user = Usuario.objects.get(id=user_id)
 
@@ -76,26 +78,50 @@ def recognize_view(request):
 
             # Save the image to the temporary path
             cv2.imwrite(temp_img_path, img_captured)
+            
             # Path to the reference image
             reference_image_path = user.photo.path
 
             # Verify the face
-            print("Performing face verification...")
+            print("Realizando verificação facial...")
             result = DeepFace.verify(
                 img1_path=str(reference_image_path),
-                img2_path=temp_img_path, # Pass the path
+                img2_path=temp_img_path,
                 model_name='VGG-Face',
                 enforce_detection=False
             )
-            print("Verification complete.")
+            print("Verificação concluída.")
 
-            if result['verified'] == True:
-
-                return render(request, "core/home.html", {'user': user})
-
-            return JsonResponse({'verified': result['verified'], 'distance': result['distance']})
+            # Registrar o acesso no log
+            if result['verified']:
+                # Acesso aprovado
+                LogAcesso.objects.create(
+                    usuario=user,
+                    result=LogAcesso.RESULT_APPROVED
+                )
+                return JsonResponse({
+                    'verified': True, 
+                    'redirect_url': reverse('core:home')
+                })
+            else:
+                # Acesso negado
+                LogAcesso.objects.create(
+                    usuario=user,
+                    result=LogAcesso.RESULT_DENIED
+                )
+                return JsonResponse({
+                    'verified': False, 
+                    'distance': result['distance']
+                })
+                
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"Ocorreu um erro: {e}")
+            # Registrar tentativa falha (quando possível identificar o usuário)
+            if 'user' in locals():
+                LogAcesso.objects.create(
+                    usuario=user,
+                    result=LogAcesso.RESULT_DENIED
+                )
             return JsonResponse({'error': str(e)}, status=400)
         finally:
             # Clean up the temporary file
