@@ -14,21 +14,6 @@ from deepface import DeepFace
 import tempfile
 import os
 
-def login_view(request):
-    error = None
-    if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        try:
-            user = Usuario.objects.get(email=email)
-            if user.verify_password(password):
-                request.session["user_id"] = user.id
-                return redirect("core:recognize")
-            else:
-                error = "Senha incorreta"
-        except Usuario.DoesNotExist:
-            error = "Usuário não encontrado"
-    return render(request, "core/login.html", {"error": error})
 
 
 def register_view(request):
@@ -39,7 +24,7 @@ def register_view(request):
             user.set_password(form.cleaned_data['password'])
             user.save()
 
-            request.session['user_id'] = user.id
+            request.session['user_id'] = user.id #cria a sessão do usuário
             return redirect('core:recognize')
         else:
             # Retorna o formulário com erros
@@ -49,6 +34,26 @@ def register_view(request):
         form = UserRegisterForm()
         return render(request, 'core/register.html', {'form': form})
 
+def login_view(request):
+    error = None
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        try:
+            user = Usuario.objects.get(email=email)
+            if user.verify_password(password): #valida a senha do usuário
+                request.session["user_id"] = user.id
+                return redirect("core:recognize")
+            else:
+                error = "Senha incorreta"
+        except Usuario.DoesNotExist:
+            error = "Usuário não encontrado"
+    return render(request, "core/login.html", {"error": error})
+
+def logout_view(request):
+    if "user_id" in request.session:
+        del request.session["user_id"]
+    return redirect('core:login')
 
 def recognize_view(request):
     if request.method == 'POST':
@@ -130,5 +135,35 @@ def recognize_view(request):
             
     return render(request, 'core/recognize.html')
 
+
 def home_view(request):
-    return render(request, 'core/home.html')
+    user_id = request.session.get('user_id')
+
+    if not user_id:
+        return redirect('/login')
+
+    user = Usuario.objects.get(id=user_id)
+
+    return render(request, 'core/home.html', {'user': user})
+
+def edit_view(request, id):
+
+    user = Usuario.objects.get(id=id)
+
+    if not id:
+        return redirect('/login')
+    
+    if request.method == "POST":
+        user.email = request.POST.get("email")
+        if "photo" in request.FILES:
+            if user.photo:
+                user.photo.delete(save=False)
+            user.photo = request.FILES["photo"]
+        
+        new_password = request.POST.get("password")
+        if new_password:
+            user.set_password(new_password)
+        user.save()
+        return redirect("core:recognize")
+
+    return render(request, 'core/edit.html', {'user': user})
