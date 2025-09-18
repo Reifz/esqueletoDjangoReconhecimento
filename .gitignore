@@ -6,4 +6,4 @@
 *.pyc
 *.cpython
 /__pycache__/
-/migrations/ 
+core/migrations/*
