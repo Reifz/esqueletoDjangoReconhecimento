@@ -184,9 +184,9 @@ nav {
 /* Botões */
 .btn {
     display: inline-block;
-    padding: 0.8rem 2rem;
-    background: linear-gradient(135deg, #4a7c59, #2d5a27);
-    color: white;
+    padding: 0.7rem 1.5rem;
+    background: linear-gradient(135deg, #a8d8a8, #7fb87f);
+    color: #2d5a27;
     text-decoration: none;
     border-radius: 25px;
     transition: all 0.3s ease;
