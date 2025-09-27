@@ -7,3 +7,4 @@
 *.cpython
 /__pycache__/
 core/migrations/*
+/node_modules/

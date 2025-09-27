@@ -1,0 +1,15 @@
+{
+  "name": "aps-processamento-imagem",
+  "version": "1.0.0",
+  "description": "aplicativo django para web em electron para desktop ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "core": "electron ."
+  },
+  "author": "Grupo APS",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^38.1.2"
+  }
+}
