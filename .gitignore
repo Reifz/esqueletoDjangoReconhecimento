@@ -2,7 +2,7 @@
 * .md
 * .jpeg
 * .jpg
-* .sqlite3
+db.sqlite3
 *.pyc
 *.cpython
 /__pycache__/
