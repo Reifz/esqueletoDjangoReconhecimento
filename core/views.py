@@ -141,6 +141,9 @@ def home_view(request):
 
     return render(request, 'core/home.html', {'user': request.user})
 
+def redirect_home(request, exception=None):
+    return redirect('/')
+
 def edit_view(request, id):
 
     if not request.user.is_authenticated or request.user.id != id:
