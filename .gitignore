@@ -3,8 +3,9 @@
 * .jpeg
 * .jpg
 * .sqlite3
-*.pyc
-*.cpython
+* .pyo
+* .pyc
+* .cpython
 /node_modules/
 **/__pycache__/
 core/migrations/*
