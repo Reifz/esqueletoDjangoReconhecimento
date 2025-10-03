@@ -2,9 +2,11 @@
 * .md
 * .jpeg
 * .jpg
-db.sqlite3
-*.pyc
-*.cpython
-/__pycache__/
-core/migrations/*
+* .sqlite3
+* .pyo
+* .pyc
+* .cpython
 /node_modules/
+**/__pycache__/
+core/migrations/*
+!core/migrations/0001_initial.py 
