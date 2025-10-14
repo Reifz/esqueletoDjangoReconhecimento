@@ -3,3 +3,4 @@ opencv-python
 deepface>=0.0.88
 mysqlclient
 tensorflow
+waitress
