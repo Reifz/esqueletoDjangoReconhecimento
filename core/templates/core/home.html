@@ -16,6 +16,9 @@
             {% if user.is_superuser and user.is_staff %}
               <a class="link-light" href="/admin">Administrador</a>
             {% endif %}
+            {% if user.nivel_acesso == '3' %}
+              <a class="link-light" href="/cofre">Cofre</a>
+            {% endif %}
           </div>
       </nav>
     </header>

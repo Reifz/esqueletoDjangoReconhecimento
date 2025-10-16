@@ -10,4 +10,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('edit/<int:id>', views.edit_view, name='edit'),
     path('recognize/', views.recognize_view, name='recognize'),
+    path('cofre/', views.cofre_view, name='cofre')
 ]

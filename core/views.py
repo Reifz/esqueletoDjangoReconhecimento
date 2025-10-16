@@ -274,3 +274,6 @@ def edit_view(request, id):
             return redirect("core:home")
 
     return render(request, 'core/edit.html', {'user': user})
+
+def cofre_view(request):
+    return render(request, 'core/cofre.html')
