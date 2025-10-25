@@ -11,7 +11,6 @@
           <div class="logo">🌱 EcoInfo</div>
           <div class="d-flex gap-2">
             Bem-vindo à Página Principal {{user.name}}
-            <a class="link-light" href="{% url 'core:edit' id=user.id %}">Editar</a>
             <a class="link-light" href="/logout">Sair</a>
             {% if user.is_superuser and user.is_staff %}
               <a class="link-light" href="/admin">Administrador</a>

@@ -15,38 +15,6 @@ from django.urls import reverse
 from core.forms import UserRegisterForm
 from .models import LogAcesso, Usuario
 
-def register_view(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Salva o usuário apenas na sessão
-            request.session.flush()  # Limpa sessão anterior
-            
-            # Armazenar dados na sessão
-            user_data = {
-                'name': form.cleaned_data['name'],
-                'email': form.cleaned_data['email'],
-                'password': form.cleaned_data['password'],
-                'nivel_acesso': form.cleaned_data.get('nivel_acesso', Usuario.ACCESS_LEVEL_1),
-            }
-            
-            # Armazenar a foto como base64 na sessão
-            if 'photo' in request.FILES:
-                photo_file = request.FILES['photo']
-                photo_data = base64.b64encode(photo_file.read()).decode('utf-8')
-                user_data['photo_data'] = photo_data
-                user_data['photo_name'] = photo_file.name
-            
-            request.session['user_data'] = user_data
-            request.session['face_verified'] = False
-            request.session['verification_time'] = 0
-            
-            return redirect('core:recognize')
-        else:
-            return render(request, 'core/register.html', {'form': form})
-    else:
-        form = UserRegisterForm()
-        return render(request, 'core/register.html', {'form': form})
 
 def login_view(request):
     error = None
@@ -226,54 +194,6 @@ def home_view(request):
 
 def redirect_home(request, exception=None):
     return redirect('/')
-
-def edit_view(request, id):
-    if not request.user.is_authenticated or request.user.id != id:
-        return redirect('/login')
-    
-    user = request.user
-    
-    if request.method == "POST":
-        user.email = request.POST.get("email")
-        user.name = request.POST.get("name")
-        user.nivel_acesso = request.POST.get("nivel_acesso", Usuario.ACCESS_LEVEL_1)
-        
-        if "photo" in request.FILES:
-            if user.photo:
-                user.photo.delete(save=False)
-            user.photo = request.FILES["photo"]
-            # Resetar verificação facial
-            request.session['face_verified'] = False
-        
-        new_password = request.POST.get("password")
-        if new_password:
-            user.set_password(new_password)
-        
-        user.save()
-
-        # Atualizar sessão se a senha mudou
-        if new_password:
-            from django.contrib.auth import update_session_auth_hash
-            update_session_auth_hash(request, user)
-        else:
-            login(request, user)
-        
-        # Atualizar dados na sessão
-        request.session['user_data'] = {
-            'user_id': user.id,
-            'email': user.email,
-            'name': user.name,
-            'photo_url': user.photo.url,
-            'nivel_acesso': user.nivel_acesso,
-        }
-        
-        # Se a foto foi alterada, exigir nova verificação
-        if "photo" in request.FILES:
-            return redirect("core:recognize")
-        else:
-            return redirect("core:home")
-
-    return render(request, 'core/edit.html', {'user': user})
 
 def cofre_view(request):
     return render(request, 'core/cofre.html')
